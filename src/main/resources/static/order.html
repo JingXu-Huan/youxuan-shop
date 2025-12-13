@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的订单 - 优选商城</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #fff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header-left a {
+            text-decoration: none;
+            color: #333;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-right a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 15px;
+        }
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .order-item {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .order-id {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .status-shipped {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .status-pending {
+            background-color: #ff9800;
+            color: white;
+        }
+        .order-info {
+            margin-bottom: 15px;
+        }
+        .order-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .goods-list {
+            margin-top: 15px;
+        }
+        .goods-list table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .goods-list th,
+        .goods-list td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .goods-list th {
+            background-color: #f8f8f8;
+        }
+        .order-total {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff4444;
+        }
+        .empty-orders {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/index.html">优选商城</a>
+        </div>
+        <div class="header-right" id="headerRight">
+            <!-- 动态加载 -->
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2 style="margin-bottom: 20px;">我的订单</h2>
+        <div id="ordersContainer">
+            <!-- 动态加载订单 -->
+        </div>
+    </div>
+
+    <script>
+        // 查询登录状态
+        async function queryLoginStatus() {
+            try {
+                const response = await fetch('/user/query');
+                const data = await response.json();
+                updateHeader(data);
+                
+                if (!data.loggedIn) {
+                    location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('查询登录状态失败:', error);
+            }
+        }
+
+        // 更新头部信息
+        function updateHeader(data) {
+            const headerRight = document.getElementById('headerRight');
+            if (data.loggedIn) {
+                headerRight.innerHTML = `
+                    <span>${data.userName}</span>
+                    <div class="cart-icon" onclick="location.href='/cart.html'">
+                        🛒
+                        <span class="cart-count">${data.cartCount || 0}</span>
+                    </div>
+                    <a href="/order.html">我的订单</a>
+                    <a href="javascript:void(0)" onclick="logout()">退出</a>
+                `;
+            } else {
+                headerRight.innerHTML = `
+                    <a href="/login.html">登录</a>
+                    <a href="/register.html">注册</a>
+                `;
+            }
+        }
+
+        // 加载订单列表
+        async function loadOrders() {
+            try {
+                const response = await fetch('/order/list');
+                const orders = await response.json();
+                displayOrders(orders);
+            } catch (error) {
+                console.error('加载订单失败:', error);
+            }
+        }
+
+        // 显示订单列表
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-orders">暂无订单</div>';
+                return;
+            }
+            
+            container.innerHTML = orders.map(order => {
+                const statusClass = order.status ? 'status-shipped' : 'status-pending';
+                const statusText = order.status ? '已发货' : '未发货';
+                const orderTime = new Date(order.orderTime).toLocaleString('zh-CN');
+                
+                const goodsTable = order.goods.map(good => `
+                    <tr>
+                        <td>${good.name}</td>
+                        <td>¥${good.price.toFixed(2)}</td>
+                        <td>${good.quantity}</td>
+                    </tr>
+                `).join('');
+                
+                return `
+                    <div class="order-item">
+                        <div class="order-header">
+                            <span class="order-id">订单编号：${order.id}</span>
+                            <span class="order-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="order-info">
+                            <p>下单时间：${orderTime}</p>
+                            <p>收货地址：${order.address}</p>
+                        </div>
+                        <div class="goods-list">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>商品名称</th>
+                                        <th>单价</th>
+                                        <th>购买数量</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${goodsTable}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="order-total">
+                            订单总额：¥${order.totalAmount.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 退出登录
+        async function logout() {
+            try {
+                const response = await fetch('/user/logout');
+                const data = await response.json();
+                if (data.success) {
+                    location.href = data.redirect;
+                }
+            } catch (error) {
+                console.error('退出登录失败:', error);
+            }
+        }
+
+        // 页面加载时执行
+        window.onload = function() {
+            queryLoginStatus();
+            loadOrders();
+        };
+    </script>
+</body>
+</html>
+

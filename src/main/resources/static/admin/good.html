@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理 - 优选商城后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #fff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-right a {
+            text-decoration: none;
+            color: #333;
+            margin-left: 15px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .good-table {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+        }
+        .good-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .add-btn {
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .add-btn:hover {
+            background-color: #45a049;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #f0f0f0;
+        }
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">优选商城后台</div>
+        <div class="header-right">
+            <span id="adminName">admin</span>
+            <a href="/admin/order.html">订单列表</a>
+            <a href="javascript:void(0)" onclick="logout()">退出</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2 style="margin-bottom: 20px;">商品管理</h2>
+        <div class="good-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th>单价</th>
+                        <th>图片</th>
+                        <th>上架时间</th>
+                    </tr>
+                </thead>
+                <tbody id="goodsBody">
+                    <!-- 动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prevBtn" onclick="changePage(currentPage - 1)">上一页</button>
+            <span class="page-info" id="pageInfo"></span>
+            <button id="nextBtn" onclick="changePage(currentPage + 1)">下一页</button>
+        </div>
+        <button class="add-btn" onclick="location.href='/admin/good_add.html'">上架新商品</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 8;
+
+        // 加载商品列表（分页）
+        async function loadGoods(page = 1) {
+            try {
+                const response = await fetch(`/good/page?current=${page}&size=${pageSize}`);
+                const data = await response.json();
+                displayGoods(data.records);
+                updatePagination(data);
+            } catch (error) {
+                console.error('加载商品失败:', error);
+            }
+        }
+
+        // 显示商品列表
+        function displayGoods(goods) {
+            const tbody = document.getElementById('goodsBody');
+            
+            if (goods.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">暂无商品</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = goods.map(good => {
+                const releaseTime = new Date(good.releaseTime).toLocaleString('zh-CN');
+                return `
+                    <tr>
+                        <td>${good.name}</td>
+                        <td>¥${good.price.toFixed(2)}</td>
+                        <td><img src="${good.pictureUrl}" alt="${good.name}" class="good-image" onerror="this.src='https://via.placeholder.com/100'"></td>
+                        <td>${releaseTime}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 更新分页控件
+        function updatePagination(data) {
+            currentPage = data.current;
+            totalPages = data.pages;
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                pageInfo.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页 (共 ${data.total} 条)`;
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+
+        // 切换页面
+        function changePage(page) {
+            if (page < 1 || page > totalPages) return;
+            loadGoods(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 退出登录
+        async function logout() {
+            try {
+                const response = await fetch('/admin/user/logout');
+                const data = await response.json();
+                if (data.success) {
+                    location.href = data.redirect;
+                }
+            } catch (error) {
+                console.error('退出登录失败:', error);
+            }
+        }
+
+        // 页面加载时执行
+        window.onload = function() {
+            loadGoods(1);
+        };
+    </script>
+</body>
+</html>
+
