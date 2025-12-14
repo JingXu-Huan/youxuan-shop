@@ -5,6 +5,8 @@ import com.example.youxuanshop.entity.User;
 import com.example.youxuanshop.mapper.UserMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.Map;
 public class UserService {
     private final UserMapper userMapper;
     private final CartService cartService;
+    private final StringRedisTemplate redisTemplate;
 
     public User findByName(String name) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
@@ -35,7 +38,7 @@ public class UserService {
     public Map<String, Object> login(String name, String password, HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         User user = findByName(name);
-        
+
         if (user != null && user.getPassword().equals(password)) {
             // 将userId存储到Session中
             session.setAttribute("userId", user.getId());
@@ -56,21 +59,21 @@ public class UserService {
 
     public Map<String, Object> register(String name, String password, String address) {
         Map<String, Object> result = new HashMap<>();
-        
+
         User existingUser = findByName(name);
         if (existingUser != null) {
             result.put("success", false);
             result.put("message", "用户名已被注册");
             return result;
         }
-        
+
         User user = new User();
         user.setName(name);
         user.setPassword(password);
         user.setAddress(address);
         user.setIsAdmin(false);
         userMapper.insert(user);
-        
+
         result.put("success", true);
         result.put("redirect", "/login.html");
         return result;
@@ -79,7 +82,7 @@ public class UserService {
     public Map<String, Object> query(HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         Integer userId = (Integer) session.getAttribute("userId");
-        
+
         if (userId != null) {
             User user = findById(userId);
             result.put("loggedIn", true);
@@ -88,7 +91,7 @@ public class UserService {
         } else {
             result.put("loggedIn", false);
         }
-        
+
         return result;
     }
 

@@ -1,0 +1,13 @@
+server:
+  port: 8086
+#spring:
+#  application:
+#    name: youxuan-service
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 101.42.157.163:8848
+#        namespace: ""
+#        group: DEFAULT_GROUP
+#        username: nacos
+#        password: nacos
