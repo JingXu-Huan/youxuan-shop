@@ -29,8 +29,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             response.getWriter().write("请先登录");
             return false;
         }
-
-        // 保存用户ID到ThreadLocal
+        // 保存用户 ID 到 ThreadLocal
         UserContext.set(userId);
         return true;
     }

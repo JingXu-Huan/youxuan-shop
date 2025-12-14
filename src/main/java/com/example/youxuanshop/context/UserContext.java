@@ -7,21 +7,21 @@ public class UserContext {
     private static final ThreadLocal<Integer> userThreadLocal = new ThreadLocal<>();
 
     /**
-     * 设置当前用户ID
+     * 设置当前用户 ID
      */
     public static void set(Integer userId) {
         userThreadLocal.set(userId);
     }
 
     /**
-     * 获取当前用户ID
+     * 获取当前用户 ID
      */
     public static Integer get() {
         return userThreadLocal.get();
     }
 
     /**
-     * 清除当前用户ID（防止内存泄漏）
+     * 清除当前用户 ID（防止内存泄漏）
      */
     public static void remove() {
         userThreadLocal.remove();

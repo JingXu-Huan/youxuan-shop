@@ -6,6 +6,7 @@ import com.example.youxuanshop.mapper.UserMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +39,6 @@ public class UserService {
         if (user != null && user.getPassword().equals(password)) {
             // 将userId存储到Session中
             session.setAttribute("userId", user.getId());
-            
             result.put("success", true);
             result.put("userId", user.getId());
             result.put("isAdmin", user.getIsAdmin());
