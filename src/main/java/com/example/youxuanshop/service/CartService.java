@@ -16,7 +16,7 @@ public class CartService {
 
     public int addToCart(Integer goodId, Integer quantity, HttpSession session) {
         List<CartItem> cart = getCart(session);
-        
+
         Good good = goodService.findById(goodId);
         if (good == null) {
             throw new RuntimeException("商品不存在");

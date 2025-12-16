@@ -21,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
+
     private final OrderService orderService;
     private final UserService userService;
     private final GoodService goodService;
@@ -28,12 +29,12 @@ public class OrderController {
     @PostMapping("/order/add")
     public ResponseEntity<Map<String, Object>> add(HttpSession session) {
         Integer userId = UserContext.get();
-        @SuppressWarnings("unchecked")
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
         String address = userService.findById(userId).getAddress();
         
         try {
-            Map<String, Object> result = orderService.createOrderFromCart(userId, cart, address);
+            Map<String, Object> result = orderService
+                    .createOrderFromCart(userId, cart, address);
             session.removeAttribute("cart");
             return ResponseEntity.ok(result);
         } catch (Exception e) {

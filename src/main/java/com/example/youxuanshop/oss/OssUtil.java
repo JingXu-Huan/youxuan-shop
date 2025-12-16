@@ -45,8 +45,4 @@ public class OssUtil {
         return "https://" + bucketName + ".oss-cn-beijing.aliyuncs.com/" + objectName;
     }
 
-    public String getPublicUrl(String fileName) {
-        // 拼接 URL 格式：http(s)://<bucketName>.<endpoint>/<fileName>
-        return "https://" + bucketName + "." + endpoint + "/" + fileName;
-    }
 }

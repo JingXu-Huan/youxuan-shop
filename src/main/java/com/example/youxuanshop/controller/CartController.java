@@ -18,9 +18,9 @@ public class CartController {
 
     @PostMapping("/cart/add")
     public ResponseEntity<Map<String, Object>> add(@RequestParam Integer goodId,
-                                                    @RequestParam(required = false) String goodName,
-                                                    @RequestParam(defaultValue = "1") Integer quantity,
-                                                    HttpSession session) {
+                                                   @RequestParam(required = false) String goodName,
+                                                   @RequestParam(defaultValue = "1") Integer quantity,
+                                                   HttpSession session) {
         Map<String, Object> result = new HashMap<>();
         try {
             int cartCount = cartService.addToCart(goodId, quantity, session);

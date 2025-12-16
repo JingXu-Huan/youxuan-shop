@@ -15,7 +15,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response, Object handler) throws Exception {
+
         HttpSession session = request.getSession(false);
         if (session == null) {
             response.setStatus(401);
@@ -35,7 +37,8 @@ public class LoginInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
         UserContext.remove();
     }
 }

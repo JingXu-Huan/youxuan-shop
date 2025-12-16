@@ -7,10 +7,12 @@ import com.example.youxuanshop.entity.OrderGood;
 import com.example.youxuanshop.mapper.OrderMapper;
 import com.example.youxuanshop.mapper.OrderGoodMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.youxuanshop.entity.CartItem;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +30,7 @@ public class OrderService {
         order.setOrderTime(LocalDateTime.now());
         order.setStatus(false);
         orderMapper.insert(order);
-        
+
         for (OrderGood orderGood : orderGoods) {
             orderGood.setOrderId(order.getId());
             orderGoodMapper.insert(orderGood);
@@ -64,20 +66,21 @@ public class OrderService {
         return orderGoodMapper.findByOrderId(orderId);
     }
 
+
     public Map<String, Object> createOrderFromCart(Integer userId, List<CartItem> cart, String address) {
         if (cart == null || cart.isEmpty()) {
             throw new RuntimeException("购物车为空");
         }
-        
+
         double totalAmount = cart.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .mapToDouble((item) -> item.getPrice() * item.getQuantity())
                 .sum();
-        
+
         Order order = new Order();
         order.setUserId(userId);
         order.setTotalAmount(totalAmount);
         order.setAddress(address);
-        
+
         List<OrderGood> orderGoods = cart.stream()
                 .map(item -> {
                     OrderGood orderGood = new OrderGood();
@@ -86,9 +89,7 @@ public class OrderService {
                     return orderGood;
                 })
                 .collect(Collectors.toList());
-        
-        createOrder(order, orderGoods);
-        
+        ((OrderService) AopContext.currentProxy()).createOrder(order, orderGoods);
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
         result.put("redirect", "/order.html");

@@ -45,7 +45,7 @@ public class GoodController {
         Good good = new Good();
         good.setName(name);
         good.setPrice(price);
-        goodService.addGood(good,file);
+        goodService.addGood(good, file);
         result.put("success", true);
         result.put("redirect", "/admin/good.html");
         return ResponseEntity.ok(result);

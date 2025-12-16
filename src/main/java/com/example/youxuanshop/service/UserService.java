@@ -32,6 +32,7 @@ public class UserService {
     }
 
     public Map<String, Object> login(String name, String password, HttpSession session) {
+        //String -> Object
         Map<String, Object> result = new HashMap<>();
         User user = findByName(name);
 
