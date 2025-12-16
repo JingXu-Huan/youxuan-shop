@@ -5,10 +5,7 @@ import com.example.youxuanshop.entity.User;
 import com.example.youxuanshop.mapper.UserMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +15,6 @@ import java.util.Map;
 public class UserService {
     private final UserMapper userMapper;
     private final CartService cartService;
-    private final StringRedisTemplate redisTemplate;
 
     public User findByName(String name) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();

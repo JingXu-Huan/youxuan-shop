@@ -4,12 +4,14 @@ import com.example.youxuanshop.context.UserContext;
 import com.example.youxuanshop.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -24,6 +26,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> login(@RequestParam String name,
                                                       @RequestParam String password,
                                                       HttpSession session) {
+        log.debug("哈哈哈");
         return ResponseEntity.ok(userService.login(name, password, session));
     }
 
