@@ -50,7 +50,6 @@ public class CartService {
         return cart.stream().mapToInt(CartItem::getQuantity).sum();
     }
 
-    @SuppressWarnings("unchecked")
     private List<CartItem> getCart(HttpSession session) {
         List<CartItem> cart = (List<CartItem>) session.getAttribute("cart");
         if (cart == null) {
